@@ -1,0 +1,117 @@
+* {
+  margin: 0px;
+}
+.App {
+  width: "100%";
+  height: "100vh";
+  background-image: url("./images/bg.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.App header {
+  text-align: center;
+  background-color: #717076;
+  padding: 10px;
+}
+.App header h1 {
+  font-size: 2.5em;
+  font-weight: 600;
+}
+.App main {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+}
+.card {
+  border: 1px solid #fff;
+  background-color: #fff;
+  border-radius: 6px;
+  width: 80%;
+  margin: 20px auto;
+}
+.card-body {
+  border: 1px solid black;
+  margin: 20px;
+  padding: 10px;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px;
+  padding: 40px auto;
+  font-size: 20px;
+}
+.row input[type="text"] {
+  font-size: 20px;
+  width: 200px;
+}
+.row button {
+  font-size: 18px;
+  padding: 10px 20px;
+  border: none;
+  color: white;
+  border-radius: 6px;
+}
+button:hover {
+  cursor: pointer;
+  scale: 105%;
+}
+.error {
+  color: red;
+  margin: 10px auto;
+}
+.data-table-row{
+  display: flex;
+  align-items: center;
+  margin: 20px;
+  padding: 40px auto;
+  font-size: 20px;
+}
+.data-table-row>div {
+  flex: 1;
+  padding: 10px;
+}
+
+.data-table-row>div:last-child {
+  flex: 0 0 5%; /* This makes the last div 10% width without flex-shrink */
+}
+.data-table-row button{
+  font-size: 18px;
+  padding: 5px 20px;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  background-color: red;
+}
+.filters input{
+  font-size: 18px;
+}
+.parking{
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.parking-space{
+  width: 100px;
+  text-align: center;
+  border: 1px solid black;
+  border-radius: 6px;
+  height: 200px;
+}
+.parked-vehicles{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  /* height: 100%; */
+}
+.parking-space .parked-vehicles .car{
+  width: 100%;
+}
+.parking-space .parked-vehicles .bike{
+  width: 40%;
+}
