@@ -40,22 +40,17 @@ const VisualRepresentation = () => {
   }
 
   useEffect(() => {
-    if (total_slots !== "") {
-      setSlots([...Array(total_slots).keys()].map((key) => ({ key: key + 1 })));
-    }
-  }, [total_slots]);
-
-  useEffect(() => {
     if (vehicles.length !== 0) {
       updateSlotsWithParkedVehicles(vehicles);
-    } else {
+    } else if (total_slots !== "") {
+      // Check if total_slots is not empty
       setSlots(
         [...Array(total_slots).keys()].map((key) => ({
           key: key + 1,
         }))
       );
     }
-  }, [vehicles,total_slots]);
+  }, [vehicles, total_slots]);
 
   return (
     <div className="VisualRepresentation card">
