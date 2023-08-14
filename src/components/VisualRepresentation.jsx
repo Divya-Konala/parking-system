@@ -21,7 +21,6 @@ const VisualRepresentation = () => {
 
       if (slotIndex >= 0 && slotIndex < updatedSlots.length) {
         const slot = updatedSlots[slotIndex];
-
         if (!slot.vehicles) {
           slot.vehicles = []; // Initialize the vehicles array if it doesn't exist
         }
@@ -37,56 +36,55 @@ const VisualRepresentation = () => {
         }
       }
     });
-
     setSlots(updatedSlots);
   }
 
   useEffect(() => {
-    if (total_slots !== "")
+    if (total_slots !== "") {
       setSlots([...Array(total_slots).keys()].map((key) => ({ key: key + 1 })));
+    }
   }, [total_slots]);
 
-
   useEffect(() => {
-    if(vehicles!==[])
-        updateSlotsWithParkedVehicles(vehicles);
-  }, [vehicles]);
-
-  if(slots.length<=1) return ""
+    if (vehicles.length !== 0) {
+      updateSlotsWithParkedVehicles(vehicles);
+    } else {
+      setSlots(
+        [...Array(total_slots).keys()].map((key) => ({
+          key: key + 1,
+        }))
+      );
+    }
+  }, [vehicles,total_slots]);
 
   return (
     <div className="VisualRepresentation card">
       <div className="card-body">
         <div className="parking">
           {slots.map((item) => {
+            const vehiclesArray = item.vehicles || [];
+
             return (
               <div className="parking-space" key={item.key}>
                 <h4>{item.key}</h4>
-                {item.vehicles ? (
+                {vehiclesArray.length > 0 && (
                   <div className="parked-vehicles">
-                    {item.vehicles[0].vehicleType === "car" ? (
+                    {vehiclesArray[0].vehicleType === "car" ? (
                       <img className="car" src={carImg} alt="Car" />
                     ) : (
-                      <>
-                        {item.vehicles[0].count === 1 ? (
-                          <img className="bike" src={bikeImg} alt="Bike" />
-                        ) : (
-                          Array.from({ length: item.vehicles[0].count }).map(
-                            (_, index) => (
-                              <img
-                                className="bike"
-                                src={bikeImg}
-                                alt="Bike"
-                                key={index}
-                              />
-                            )
-                          )
-                        )}
-                      </>
+                      vehiclesArray[0].vehicleType === "bike" &&
+                      Array.from({ length: vehiclesArray[0].count }).map(
+                        (_, index) => (
+                          <img
+                            className="bike"
+                            src={bikeImg}
+                            alt="Bike"
+                            key={`${item.key}-${vehiclesArray[0].vehicleType}-${index}`}
+                          />
+                        )
+                      )
                     )}
                   </div>
-                ) : (
-                  ""
                 )}
               </div>
             );

@@ -11,11 +11,14 @@ const AddForm = () => {
   const [vehicleType, setVehicleType] = useState("");
   const [error, setError] = useState("");
 
-  const { available,filled, duplicate_err } = useSelector((state) => ({
-    available: state.available_slots.length,
-    filled: state.filled,
-    duplicate_err: state.dup_err,
-  }));
+  const { total_slots, available, filled, duplicate_err } = useSelector(
+    (state) => ({
+      total_slots: state.total_slots,
+      available: state.available_slots.length,
+      filled: state.filled,
+      duplicate_err: state.dup_err,
+    })
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,10 +36,17 @@ const AddForm = () => {
     if (regis.match(/^[A-Z]{2}-\d{2}-[A-Z]{2}-[1-9]\d{3}$/)) {
       if (colour.match(/[A-Za-z]+/)) {
         if (vehicleType !== "") {
-          dispatch(addNew(regis, colour, vehicleType));
-          setRegis("");
-          setColour("");
-          setVehicleType("");
+          if (
+            total_slots - filled >= 1 ||
+            (total_slots - filled === 0.5 && vehicleType === "bike")
+          ) {
+            dispatch(addNew(regis, colour, vehicleType));
+            setRegis("");
+            setColour("");
+            setVehicleType("");
+          } else {
+            er = "space not enough to accomodate new vehicle";
+          }
         } else {
           er = "Please select vehicle type";
         }
@@ -50,7 +60,7 @@ const AddForm = () => {
     setError(er);
   };
 
-  if(available===0){
+  if (available === 0) {
     return "";
   }
 
@@ -59,7 +69,7 @@ const AddForm = () => {
       <div className="card-body">
         <div>
           <div style={{ fontSize: "1.5rem", fontWeight: "600" }}>
-            Available space: {(available-filled)}
+            Available space: {total_slots - filled}
           </div>
           <div className="error">{error}</div>
           <div className="error">

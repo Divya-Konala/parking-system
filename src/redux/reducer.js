@@ -6,77 +6,87 @@ import {
   UPDATE_FORM,
 } from "./actionTypes";
 
-const initialize = {
-  total_slots: "",
-  filled: 0,
-  vehicles: [],
-  available_slots: [],
-  dup_err: 0,
-  regfilter: "",
-  colorfilter: "",
-  slotfilter: "",
-  vehicleTypefilter: ""
-};
+const localStorageKey = "parking_lot_state";
 
-const parking_lot = (state = initialize, action) => {
+const initialState = localStorage.getItem(localStorageKey)
+  ? JSON.parse(localStorage.getItem(localStorageKey))
+  : {
+      total_slots: "",
+      filled: 0,
+      vehicles: [],
+      available_slots: [],
+      dup_err: 0,
+      regfilter: "",
+      colorfilter: "",
+      slotfilter: "",
+      vehicleTypefilter: "",
+    };
+
+const parking_lot = (state = initialState, action) => {
+  let newState;
   switch (action.type) {
     case UPDATE_FORM:
-      return {
+      newState = {
         ...state,
         [action.field.name]: action.field.value,
       };
+      break;
 
-    case POPULATE: {
-      let s = [];
-      for (let i = state.filled + 1; i <= state.total_slots; i++) {
-        s.push({ slot: i, vehicleType: null });
+    case POPULATE:
+      {
+        let s = [];
+        for (let i = state.filled + 1; i <= state.total_slots; i++) {
+          s.push({ slot: i, vehicleType: null });
+        }
+        newState = {
+          ...state,
+          available_slots: s,
+        };
       }
-      return {
-        ...state,
-        available_slots: s,
-      };
-    }
+      break;
+    case CLEAR_SLOT:
+      {
+        const exitVehicleType = action.slot.vehicleType;
 
-    case CLEAR_SLOT: {
-      const exitVehicleType = action.slot.vehicleType;
+        const exitVehicle = state.vehicles.find(
+          (item) => item.registration === action.registration
+        );
+        const currentDate = Date.now();
+        const prevDate = new Date(exitVehicle.date).getTime();
+        const parkedTime = Math.floor((currentDate - prevDate) / (1000 * 60));
+        const parkingCharges = 20 + parkedTime * 1;
+        const userConfirmed = window.confirm(
+          `parking charges: ${parkingCharges}. Payment completed?`
+        );
 
-      const exitVehicle = state.vehicles.find(
-        (item) => item.registration === action.registration
-      );
-      const currentDate = Date.now();
-      const prevDate = new Date(exitVehicle.date).getTime();
-      const parkedTime = Math.floor((currentDate - prevDate) / (1000 * 60));
-      const parkingCharges = 20 + (parkedTime*1);
-      const userConfirmed = window.confirm(
-        `parking charges: ${parkingCharges}. Payment completed?`
-      );
+        if (!userConfirmed) {
+          newState = state;
+          break;
+        }
 
-      if (!userConfirmed) {
-        return state;
+        const updatedAvailableSlots = [...state.available_slots];
+        const slotIndex = updatedAvailableSlots.findIndex(
+          (slot) => slot.slot === action.slot.slot
+        );
+
+        if (slotIndex === -1) {
+          updatedAvailableSlots.push(action.slot);
+          updatedAvailableSlots.sort((m, n) => m.slot - n.slot);
+        } else {
+          updatedAvailableSlots[slotIndex].vehicleType = null;
+        }
+
+        newState = {
+          ...state,
+          vehicles: state.vehicles.filter(
+            (item) => item.registration !== action.registration
+          ),
+          filled:
+            state.filled - parseFloat(exitVehicleType === "bike" ? 0.5 : 1),
+          available_slots: updatedAvailableSlots,
+        };
       }
-
-      const updatedAvailableSlots = [...state.available_slots];
-      const slotIndex = updatedAvailableSlots.findIndex(
-        (slot) => slot.slot === action.slot.slot
-      );
-
-      if (slotIndex === -1) {
-        updatedAvailableSlots.push(action.slot);
-        updatedAvailableSlots.sort((m, n) => m.slot - n.slot);
-      } else {
-        updatedAvailableSlots[slotIndex].vehicleType = null;
-      }
-
-      return {
-        ...state,
-        vehicles: state.vehicles.filter(
-          (item) => item.registration !== action.registration
-        ),
-        filled: state.filled - parseFloat(exitVehicleType === "bike" ? 0.5 : 1),
-        available_slots: updatedAvailableSlots,
-      };
-    }
-
+      break;
     case ADD_NEW:
       if (!checkExists(state.vehicles, action.reg)) {
         // Find the first available slot for the vehicle type
@@ -99,7 +109,7 @@ const parking_lot = (state = initialize, action) => {
               return item;
             });
           }
-          return {
+          newState = {
             ...state,
             vehicles: [
               {
@@ -118,21 +128,26 @@ const parking_lot = (state = initialize, action) => {
             dup_err: 0,
           };
         }
+      } else {
+        newState = {
+          ...state,
+          dup_err: 1,
+        };
       }
-      return {
-        ...state,
-        dup_err: 1,
-      };
+      break;
 
     case UPDATE_FILTER:
-      return {
+      newState = {
         ...state,
         [action.filter.name]: action.filter.val,
       };
-
+      break;
     default:
-      return state;
+      newState = state;
+      break;
   }
+  localStorage.setItem(localStorageKey, JSON.stringify(newState));
+  return newState;
 };
 
 function checkExists(data, key) {
@@ -143,7 +158,6 @@ function checkExists(data, key) {
       break;
     }
   }
-
   return result;
 }
 
